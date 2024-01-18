@@ -10,6 +10,7 @@ import sys
 import textwrap
 import time
 import yaml
+import asyncio
 
 from shot_scraper.utils import filename_for_url, url_or_file_path
 
@@ -969,7 +970,7 @@ def _check_and_absolutize(filepath):
         return False
 
 
-def take_shot(
+async def take_shot(
     context_or_page,
     shot,
     return_bytes=False,
@@ -1002,23 +1003,14 @@ def take_shot(
     selectors_all = shot.get("selectors_all") or []
     js_selectors = shot.get("js_selectors") or []
     js_selectors_all = shot.get("js_selectors_all") or []
-    # If a single 'selector' append to 'selectors' array (and 'js_selectors' etc)
-    if shot.get("selector"):
-        selectors.append(shot["selector"])
-    if shot.get("selector_all"):
-        selectors_all.append(shot["selector_all"])
-    if shot.get("js_selector"):
-        js_selectors.append(shot["js_selector"])
-    if shot.get("js_selector_all"):
-        js_selectors_all.append(shot["js_selector_all"])
 
     if not use_existing_page:
-        page = context_or_page.new_page()
+        page = await context_or_page.new_page()
         if log_requests:
 
-            def on_response(response):
+            async def on_response(response):
                 try:
-                    body = response.body()
+                    body = await response.body()
                     size = len(body)
                 except Error:
                     size = None
@@ -1049,13 +1041,13 @@ def take_shot(
             "width": shot.get("width") or 1280,
             "height": shot.get("height") or 720,
         }
-        page.set_viewport_size(viewport)
+        await page.set_viewport_size(viewport)
         if shot.get("height"):
             full_page = False
 
     if not use_existing_page:
         # Load page and check for errors
-        response = page.goto(url)
+        response = await page.goto(url)
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
             if skip:
@@ -1069,14 +1061,14 @@ def take_shot(
                 )
 
     if wait:
-        time.sleep(wait / 1000)
+        await asyncio.sleep(wait / 1000)
 
     javascript = shot.get("javascript")
     if javascript:
-        _evaluate_js(page, javascript)
+        await _evaluate_js(page, javascript)
 
     if wait_for:
-        page.wait_for_function(wait_for)
+        await page.wait_for_function(wait_for)
 
     screenshot_args = {}
     if quality:
@@ -1100,19 +1092,19 @@ def take_shot(
             js_selector_javascript,
             extra_selectors,
             extra_selectors_all,
-        ) = _js_selector_javascript(js_selectors, js_selectors_all)
+        ) = await _js_selector_javascript(js_selectors, js_selectors_all)
         selectors.extend(extra_selectors)
         selectors_all.extend(extra_selectors_all)
-        _evaluate_js(page, js_selector_javascript)
+        await _evaluate_js(page, js_selector_javascript)
 
     if selectors or selectors_all:
-        # Use JavaScript to create a box around those elementsdef
-        selector_javascript, selector_to_shoot = _selector_javascript(
+        # Use JavaScript to create a box around those elements
+        selector_javascript, selector_to_shoot = await _selector_javascript(
             selectors, selectors_all, padding
         )
-        _evaluate_js(page, selector_javascript)
+        await _evaluate_js(page, selector_javascript)
         try:
-            bytes_ = page.locator(selector_to_shoot).screenshot(**screenshot_args)
+            bytes_ = await page.locator(selector_to_shoot).screenshot(**screenshot_args)
         except TimeoutError as e:
             raise click.ClickException(
                 "Timed out while waiting for element to become available.\n\n{}".format(
@@ -1122,16 +1114,16 @@ def take_shot(
         if return_bytes:
             return bytes_
         else:
-            page.locator(selector_to_shoot).screenshot(**screenshot_args)
+            await page.locator(selector_to_shoot).screenshot(**screenshot_args)
             message = "Screenshot of '{}' on '{}' written to '{}'".format(
                 ", ".join(list(selectors) + list(selectors_all)), url, output
             )
     else:
         # Whole page
         if return_bytes:
-            return page.screenshot(**screenshot_args)
+            return await page.screenshot(**screenshot_args)
         else:
-            page.screenshot(**screenshot_args)
+            await page.screenshot(**screenshot_args)
             message = "Screenshot of '{}' written to '{}'".format(url, output)
     if not silent:
         click.echo(message, err=True)
