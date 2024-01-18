@@ -1014,7 +1014,6 @@ def take_shot(
 
     if not use_existing_page:
         page = context_or_page.new_page()
-        page.wait_for_load_state()
         if log_requests:
 
             def on_response(response):
