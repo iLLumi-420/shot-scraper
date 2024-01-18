@@ -283,6 +283,8 @@ def shot(
     interactive = interactive or devtools
 
     if browser_instance:
+
+        page = browser_instance.new_page()
         try:
             if output == "-":
                 shot = take_shot(
