@@ -972,7 +972,6 @@ def _check_and_absolutize(filepath):
 def take_shot(
     context_or_page,
     shot,
-    browser_instance = None,
     return_bytes=False,
     use_existing_page=False,
     log_requests=None,
@@ -1014,11 +1013,7 @@ def take_shot(
         js_selectors_all.append(shot["js_selector_all"])
 
     if not use_existing_page:
-        if browser_instance:
-            page = browser_instance.new_page()
-        else:
-            page = context_or_page.new_page()
-
+        page = context_or_page.new_page()
         if log_requests:
 
             def on_response(response):
@@ -1060,10 +1055,7 @@ def take_shot(
 
     if not use_existing_page:
         # Load page and check for errors
-        if browser_instance:
-            response = page.goto(url)
-        else:
-            response = context_or_page.goto(url)
+        response = page.goto(url)
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
             if skip:
