@@ -1125,6 +1125,7 @@ async def take_shot(
         else:
             await page.screenshot(**screenshot_args)
             message = "Screenshot of '{}' written to '{}'".format(url, output)
+            return message
     if not silent:
         click.echo(message, err=True)
 
