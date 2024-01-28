@@ -1046,7 +1046,7 @@ async def take_shot(
 
     if not use_existing_page:
         # Load page and check for errors
-        response = await page.goto(url, { 'waitUntil' : 'networkidle'})
+        response = await page.goto(url, options = {'waitUntil' : 'networkidle'})
 
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
