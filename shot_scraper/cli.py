@@ -18,7 +18,6 @@ BROWSERS = ("chromium", "firefox", "webkit", "chrome", "chrome-beta")
 
 
 
-
 def console_log(msg):
     click.echo(msg, err=True)
 
@@ -1047,8 +1046,8 @@ async def take_shot(
 
     if not use_existing_page:
         # Load page and check for errors
-        response = await page.goto(url)
-        page.waitForLoadState('networkidle') 
+        response = await page.goto(url, { 'waitUntil' : 'networkidle'})
+
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
             if skip:
