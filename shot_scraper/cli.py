@@ -1048,7 +1048,7 @@ async def take_shot(
     if not use_existing_page:
         # Load page and check for errors
         response = await page.goto(url)
-        await page.wait_for_load_state('load')
+        await page.wait_for_load_state('domcontentloaded')
 
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
