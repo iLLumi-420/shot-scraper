@@ -1060,21 +1060,6 @@ async def take_shot(
                 raise click.ClickException(
                     "{} error for {}".format(response.status, url)
                 )
-    else:
-        response = await page.goto(url)
-        await page.waitForLoadState('networkidle')
-
-        # Check if page was a 404 or 500 or other error
-        if str(response.status)[0] in ("4", "5"):
-            if skip:
-                click.echo(
-                    "{} error for {}, skipping".format(response.status, url), err=True
-                )
-                return
-            elif fail:
-                raise click.ClickException(
-                    "{} error for {}".format(response.status, url)
-                )
 
     if wait:
         await asyncio.sleep(wait / 1000)
