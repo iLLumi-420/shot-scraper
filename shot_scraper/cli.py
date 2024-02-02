@@ -1050,6 +1050,7 @@ async def take_shot(
         response = await page.goto(url)
         await page.wait_for_load_state('networkidle')
         response_url = await page.url()
+        print(url)
 
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
@@ -1062,6 +1063,7 @@ async def take_shot(
                 raise click.ClickException(
                     "{} error for {}".format(response.status, url)
                 )
+    
 
     if wait:
         await asyncio.sleep(wait / 1000)
