@@ -1125,7 +1125,7 @@ async def take_shot(
     else:
         # Whole page
         if return_bytes:
-            return await page.screenshot(**screenshot_args)
+            return await page.screenshot(**screenshot_args), response_url
         else:
             await page.screenshot(**screenshot_args)
             message = "Screenshot of '{}' written to '{}'".format(url, output)
