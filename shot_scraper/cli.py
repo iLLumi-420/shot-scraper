@@ -1049,6 +1049,7 @@ async def take_shot(
         # Load page and check for errors
         response = await page.goto(url)
         await page.wait_for_load_state('networkidle')
+        response_url = await page.url()
 
         # Check if page was a 404 or 500 or other error
         if str(response.status)[0] in ("4", "5"):
@@ -1128,7 +1129,7 @@ async def take_shot(
         else:
             await page.screenshot(**screenshot_args)
             message = "Screenshot of '{}' written to '{}'".format(url, output)
-            return message
+            return message, response_url
     if not silent:
         click.echo(message, err=True)
 
